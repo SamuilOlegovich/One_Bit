@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: authorization-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/auth/realms/mastera
+server:
+  servlet:
+    context-path: /authorization
+
+logging.level:
+  org.springframework.cloud.gateway: DEBUG
+  org.springframework.security: DEBUG
+  org.springframework.web.reactive.function.client: TRACE

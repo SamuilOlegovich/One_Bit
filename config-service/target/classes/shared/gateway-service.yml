@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay
+      routes:
+        - id: authorization-route
+          uri: lb://authorization-service/authorization
+          predicates:
+            - Path=/authorization/**
+          filters:
+            - RemoveRequestHeader=Cookie
+
+        - id: game
+          uri: lb://game-service/game
+          predicates:
+            - Path=/game/**
+          filters:
+            - RemoveRequestHeader=Cookie
+
+        - id: pay
+            uri: lb://pay-service/game
+            predicates:
+              - Path=/pay/**
+            filters:
+              - RemoveRequestHeader=Cookie
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            token-uri: http://localhost:8090/auth/realms/master/protocol/openid-connect/token
+            authorization-uri: http://localhost:8090/auth/realms/master/protocol/openid-connect/auth
+            userinfo-uri: http://localhost:8090/auth/realms/master/protocol/openid-connect/userinfo
+            user-name-attribute: preferred_username
+        registration:
+          spring-cloud:
+            provider: keycloak
+            client-id: spring-cloud
+            client-secret: 70dd3844-39f8-4599-8ccc-ce0e1894af79
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+
+server.port: 8080
+
+logging.level:
+  org.springframework.cloud.gateway: DEBUG
+  org.springframework.security: DEBUG
+  org.springframework.web.reactive.function.client: TRACE
