@@ -1,18 +1,19 @@
 package com.samuilolegovich.model;
 
-import com.samuilolegovich.domain.Arsenal;
-import com.samuilolegovich.domain.Lotto;
-import com.samuilolegovich.dto.PlayerInfoFoBetDto;
+import com.samuilolegovich.domain.*;
 import com.samuilolegovich.dto.WonOrNotWon;
 import com.samuilolegovich.enums.Enums;
 import com.samuilolegovich.enums.InformationAboutRates;
 import com.samuilolegovich.enums.Prize;
 import com.samuilolegovich.enums.RedBlack;
+import com.samuilolegovich.repository.*;
 import com.samuilolegovich.util.Constants;
 import com.samuilolegovich.util.Converter;
 import com.samuilolegovich.util.Generator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import static com.samuilolegovich.util.Converter.convertForUserCalculation;
 
 @Component
 @RequiredArgsConstructor
@@ -58,19 +59,21 @@ public class Bet {
 
 
 
-    public WonOrNotWon calculateTheWin(PlayerInfoFoBetDto playerInfoFoBet, int bet, RedBlack redBlackBet) {
+    public WonOrNotWon calculateTheWin(Player player, int bet, RedBlack redBlackBet) {
         // получаем игрока и данные о его кредитах
-        long playerCredits = playerInfoFoBet.getCredits();
+        long playerCredits = player.getCredits();
 
         // берем последнюю запись в арсенале (она максимально актуальна на данный момент)
         Arsenal arsenal = arsenalRepo.findFirstByOrderByCreatedAtDesc();
         long arsenalCredit = arsenal.getCredits();
 
         // проверяем достаточно ли кредитов в запасе на ответ ставке
-        if (Converter.convertForUserCalculation(arsenalCredit) <= (long) bet)
+        if (convertForUserCalculation(arsenalCredit) <= (long) bet)
             return WonOrNotWon.builder()
+                    .totalLoansNow(convertForUserCalculation(player.getCredits()))
                     .replyToBet(InformationAboutRates.NOT_ENOUGH_CREDIT_FOR_ANSWER)
-                    .win(0).build();
+                    .win(0L)
+                    .build();
 
         // Получаем состояния системы
         Lotto lotto = lottoRepo.findFirstByOrderByCreatedAtDesc();
@@ -87,14 +90,16 @@ public class Bet {
         if (bias > Constants.ZERO_BIAS) {
             // если лото позволяет дробление
             if (checkForWinningsLotto(lottoCredits)) {
-                if (generatedLotto == Constants.LOTTO) return point(playerInfoFoBet, playerCredits, lottoCredits);
-                if (generatedLotto == Constants.SUPER_LOTTO) return superLotto(playerInfoFoBet, playerCredits, lottoCredits);
+                if (generatedLotto == Constants.LOTTO)
+                    return point(player, playerCredits, lottoCredits);
+                if (generatedLotto == Constants.SUPER_LOTTO)
+                    return superLotto(player, playerCredits, lottoCredits);
             }
-            return takeIntoAccountTheBias(playerInfoFoBet, playerCredits, bet, redBlackBet, arsenalCredit,
+            return takeIntoAccountTheBias(player, playerCredits, bet, redBlackBet, arsenalCredit,
                     lottoCredits, condition, bias);
         }
 
-        return wonOrNotWon(playerInfoFoBet, playerCredits, bet, redBlackBet, generatedLotto,
+        return wonOrNotWon(player, playerCredits, bet, redBlackBet, generatedLotto,
                 arsenalCredit, lottoCredits, condition);
     }
 
@@ -103,41 +108,66 @@ public class Bet {
 
 
     private WonOrNotWon point(Player player, long playerCredits, long lottoCredits) {
-        long onePercent = lottoCredits / 100;
+        long onePercent = lottoCredits / 100L;
         long boobyPrize = onePercent * Constants.BOOBY_PRIZE;
         long totalDonation = donationsRepo.findFirstByOrderByCreatedAtDesc().getTotalDonations() + onePercent;
 
         player.setCredits(playerCredits + boobyPrize);
 
-        lottoRepo.save(new Lotto(lottoCredits - (boobyPrize + onePercent)));
-        donationsRepo.save(new Donations(onePercent, totalDonation, Prize.LOTTO));
+        lottoRepo.save(Lotto.builder()
+                .lottoCredits(lottoCredits - (boobyPrize + onePercent))
+                .build()
+        );
+        donationsRepo.save(Donations.builder()
+                .totalDonations(totalDonation)
+                .donations(onePercent)
+                .typeWin(Prize.LOTTO)
+                .build()
+        );
         playerRepo.save(player);
 
-        return new Win(Prize.LOTTO, boobyPrize / Constants.FOR_USER_CALCULATIONS);
+        return WonOrNotWon.builder()
+                .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                .win(convertForUserCalculation(boobyPrize))
+                .replyToBet(Prize.LOTTO)
+                .build();
     }
 
 
 
     private WonOrNotWon superLotto(Player player, long playerCredits, long lottoCredits) {
         // добавить откусывание 10 процентов в фонд
-        long onePercent = lottoCredits / 100;
+        long onePercent = lottoCredits / 100L;
         long donation = onePercent * Constants.DONATE;
         long allLotto = onePercent * Constants.PRIZE;
         long totalDonations = donationsRepo.findFirstByOrderByCreatedAtDesc().getTotalDonations() + donation;
 
         player.setCredits(playerCredits + allLotto);
 
-        donationsRepo.save(new Donations(donation, totalDonations, Prize.LOTTO));
-        lottoRepo.save(new Lotto(0));
+        donationsRepo.save(Donations.builder()
+                .totalDonations(totalDonations)
+                .typeWin(Prize.LOTTO)
+                .donations(donation)
+                .build()
+        );
+        lottoRepo.save(Lotto.builder()
+                .lottoCredits(0L)
+                .build()
+        );
         playerRepo.save(player);
 
-        return new Win(Prize.LOTTO, allLotto / Constants.FOR_USER_CALCULATIONS);
+        return WonOrNotWon.builder()
+                .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                .win(convertForUserCalculation(allLotto))
+                .replyToBet(Prize.SUPER_LOTTO)
+                .build();
     }
 
 
 
-    private WonOrNotWon takeIntoAccountTheBias(Player player, long playerCredits, int bet, RedBlack redBlackBet,
-                                       long arsenalCredit, long lottoCredits, Condition condition, int bias) {
+    private WonOrNotWon takeIntoAccountTheBias(Player player, long playerCredits, int bet,
+                                               RedBlack redBlackBet, long arsenalCredit, long lottoCredits,
+                                               Condition condition, int bias) {
 
         int resultCredits = bet * Constants.FOR_USER_CALCULATIONS;
 
@@ -145,9 +175,15 @@ public class Bet {
 
         // перенос средств в лото или арсенал
         if (bias == Constants.ONE_BIAS) {
-            lottoRepo.save(new Lotto(lottoCredits + resultCredits));
+            lottoRepo.save(Lotto.builder()
+                    .lottoCredits(lottoCredits + resultCredits)
+                    .build()
+            );
         } else {
-            arsenalRepo.save(new Arsenal(arsenalCredit + resultCredits));
+            arsenalRepo.save(Arsenal.builder()
+                    .credits(arsenalCredit + resultCredits)
+                    .build()
+            );
         }
 
         // уменьшаем смещение
@@ -156,18 +192,23 @@ public class Bet {
         conditionRepo.save(condition);
         playerRepo.save(player);
 
-        return new Win(Prize.ZERO, 0);
+        return WonOrNotWon.builder()
+                .replyToBet(Prize.ZERO)
+                .win(0L)
+                .build();
     }
 
 
 
-    private WonOrNotWon wonOrNotWon(Player player, long playerCredits, int bet, RedBlack redBlackBet, byte generatedLotto,
-                            long arsenalCredits, long lottoCredits, Condition condition) {
+    private WonOrNotWon wonOrNotWon(Player player, long playerCredits, int bet, RedBlack redBlackBet,
+                                    byte generatedLotto, long arsenalCredits, long lottoCredits, Condition condition) {
 
         // если лото позволяет дробление
         if (checkForWinningsLotto(lottoCredits)) {
-            if (generatedLotto == Constants.LOTTO) return point(player, playerCredits, lottoCredits);
-            if (generatedLotto == Constants.SUPER_LOTTO) return superLotto(player, playerCredits, lottoCredits);
+            if (generatedLotto == Constants.LOTTO)
+                return point(player, playerCredits, lottoCredits);
+            if (generatedLotto == Constants.SUPER_LOTTO)
+                return superLotto(player, playerCredits, lottoCredits);
         }
 
         Enums redBlackConvert = Converter.convert(generatedLotto);
@@ -178,20 +219,31 @@ public class Bet {
         if (redBlackConvert.equals(redBlackBet)) {
             condition.setBias(Constants.BIAS);
             player.setCredits(playerCredits + resultCredits);
-
-            arsenalRepo.save(new Arsenal(arsenalCredits - resultCredits));
+            arsenalRepo.save(Arsenal.builder()
+                    .credits(arsenalCredits - resultCredits)
+                    .build()
+            );
             conditionRepo.save(condition);
             playerRepo.save(player);
 
-            return new Win(Prize.WIN, bet);
+            return WonOrNotWon.builder()
+                    .replyToBet(Prize.WIN)
+                    .win(bet)
+                    .build();
         }
 
         player.setCredits(playerCredits - resultCredits);
-
-        lottoRepo.save(new Lotto(lottoCredits + resultCredits));
+        lottoRepo.save(Lotto.builder()
+                .lottoCredits(lottoCredits + resultCredits)
+                .build()
+        );
         playerRepo.save(player);
 
-        return new Win(Prize.ZERO, 0);
+        return WonOrNotWon.builder()
+                .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                .replyToBet(Prize.ZERO)
+                .win(0L)
+                .build();
     }
 
 

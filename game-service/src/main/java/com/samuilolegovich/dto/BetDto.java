@@ -1,7 +1,7 @@
 package com.samuilolegovich.dto;
 
+import com.samuilolegovich.enums.Enums;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -10,9 +10,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerInfoFoBetDto {
-    private long id;
-    private String userName;
-    private long credits;
-
+public class BetDto {
+    private Long playerId;
+    private String playerName;
+    private Integer bet;
+    private Enums colorBet;
 }

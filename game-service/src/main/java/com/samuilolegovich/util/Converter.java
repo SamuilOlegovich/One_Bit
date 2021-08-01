@@ -3,7 +3,6 @@ package com.samuilolegovich.util;
 import com.samuilolegovich.enums.Enums;
 import com.samuilolegovich.enums.Prize;
 import com.samuilolegovich.enums.RedBlack;
-import com.samuilolegovich.util.Constants;
 
 public class Converter {
     // конвертирует число в енум
@@ -15,6 +14,8 @@ public class Converter {
         return Prize.ZERO;
     }
 
+    // конвертируем общее количество монет (кредитов) в базе в удобоваримы вариант для юзера,
+    // обыяно делим на 10
     public static long convertForUserCalculation(long creditsPlayer) {
         return (long) (creditsPlayer / Constants.FOR_USER_CALCULATIONS);
     }
