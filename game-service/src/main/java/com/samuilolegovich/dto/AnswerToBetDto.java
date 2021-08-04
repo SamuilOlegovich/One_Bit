@@ -14,8 +14,11 @@ public class AnswerToBetDto {
     private Enums informationForBet;
     private Enums winningCombination;
     private Enums claimedCombination;
+
     private Long totalPlayerCredits;
     private Long win;
+    private Long lottoNow;
+
     private String comment;
 
 }

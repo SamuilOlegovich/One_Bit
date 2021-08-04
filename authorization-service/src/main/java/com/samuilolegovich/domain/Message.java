@@ -1,13 +1,21 @@
 package com.samuilolegovich.domain;
 
 import com.samuilolegovich.domain.util.MessageHelper;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
+@Data
 @Table(name = "messages")
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Message {
     @Id // @ID - Важно чтобы была из библиотеке -> javax.persistence.Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,24 +35,8 @@ public class Message {
             joinColumns = { @JoinColumn(name = "messages_id") },
             inverseJoinColumns = { @JoinColumn(name = "player_id")}
     )
+
     private Set<Player> likes = new HashSet<>();
-
-
-
-    public Message() {
-    }
-
-    public Message(String teg, String message) {
-        this.message = message;
-        this.tag = teg;
-    }
-
-    public Message(String tag, String message, Player user) {
-        this.message = message;
-        this.author = user;
-        this.tag = tag;
-    }
-
 
     public String getPlayerNickName() {
         return MessageHelper.getPlayerUserName(author);

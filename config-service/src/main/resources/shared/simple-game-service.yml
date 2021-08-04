@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: simple-game-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/auth/realms/master
+server:
+  servlet:
+    context-path: /simple-game
+logging.level:
+  org.springframework.cloud.gateway: DEBUG
+  org.springframework.security: DEBUG
+  org.springframework.web.reactive.function.client: TRACE

@@ -1,4 +1,4 @@
-package com.samuilolegovich.config.swagger;
+package com.samuilolegovich.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -43,6 +43,7 @@
         <module>config-service</module>
         <module>game-service</module>
         <module>pay-service</module>
+        <module>simple-game-service</module>
     </modules>
 
 

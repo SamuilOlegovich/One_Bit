@@ -1,9 +1,9 @@
 spring:
   application:
-    name: game-service
+    name: simple-game-service
   cloud:
     config:
       uri: http://localhost:8888
       fail-fast: true
-      password: ${CONFIG_SERVICE_PASSWORD}
+      password: password
       username: user
