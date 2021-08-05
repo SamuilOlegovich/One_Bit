@@ -11,7 +11,11 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WonOrNotWon {
+    private Enums declaredRate;
     private Enums replyToBet;
+    private long playerCredits;
+    private long bet;
     private long win;
     private long totalLoansNow;
+    private long totalLottoNow;
 }

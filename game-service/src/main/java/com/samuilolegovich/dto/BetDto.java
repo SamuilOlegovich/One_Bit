@@ -13,6 +13,6 @@ import lombok.experimental.SuperBuilder;
 public class BetDto {
     private Long playerId;
     private String playerName;
-    private Integer bet;
+    private Long bet;
     private Enums colorBet;
 }

@@ -17,7 +17,7 @@ import static com.samuilolegovich.util.Converter.convertForUserCalculation;
 
 @Component
 @RequiredArgsConstructor
-public class Bet {
+public class BetLogic {
     private final ConditionRepo conditionRepo;
     private final DonationsRepo donationsRepo;
     private final ArsenalRepo arsenalRepo;
@@ -28,10 +28,10 @@ public class Bet {
     /*  Если будут проблеммы с синхронизацией и неадекватным списанием средств
         то расскоментировать код ниже. А так же внутренности класса BetConfig.
 
-    private static volatile Bet bet;
+    private static volatile BetLogic bet;
 
 
-    private Bet(ConditionRepo conditionRepo, DonationsRepo donationsRepo, ArsenalRepo arsenalRepo,
+    private BetLogic(ConditionRepo conditionRepo, DonationsRepo donationsRepo, ArsenalRepo arsenalRepo,
                 PlayerRepo playerRepo, LottoRepo lottoRepo) {
         this.conditionRepo = conditionRepo;
         this.donationsRepo = donationsRepo;
@@ -41,14 +41,14 @@ public class Bet {
     }
 
 
-    public static Bet getInstance(ConditionRepo conditionRepo, DonationsRepo donationsRepo, ArsenalRepo arsenalRepo,
+    public static BetLogic getInstance(ConditionRepo conditionRepo, DonationsRepo donationsRepo, ArsenalRepo arsenalRepo,
                                   PlayerRepo playerRepo, LottoRepo lottoRepo) {
-        Bet localInstance = bet;
+        BetLogic localInstance = bet;
         if (localInstance == null) {
-            synchronized (Bet.class) {
+            synchronized (BetLogic.class) {
                 localInstance = bet;
                 if (localInstance == null) {
-                    bet = localInstance = new Bet(conditionRepo, donationsRepo, arsenalRepo, playerRepo, lottoRepo);
+                    bet = localInstance = new BetLogic(conditionRepo, donationsRepo, arsenalRepo, playerRepo, lottoRepo);
                 }
             }
         }
@@ -59,7 +59,7 @@ public class Bet {
 
 
 
-    public WonOrNotWon calculateTheWin(Player player, int bet, RedBlack redBlackBet) {
+    public WonOrNotWon calculateTheWin(Player player, Long bet, RedBlack redBlackBet) {
         // получаем игрока и данные о его кредитах
         long playerCredits = player.getCredits();
 
@@ -68,12 +68,14 @@ public class Bet {
         long arsenalCredit = arsenal.getCredits();
 
         // проверяем достаточно ли кредитов в запасе на ответ ставке
-        if (convertForUserCalculation(arsenalCredit) <= (long) bet)
+        if (convertForUserCalculation(arsenalCredit) <= bet) {
             return WonOrNotWon.builder()
-                    .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                    .totalLottoNow(lottoRepo.findFirstByOrderByCreatedAtDesc().getLottoCredits())
                     .replyToBet(InformationAboutRates.NOT_ENOUGH_CREDIT_FOR_ANSWER)
+                    .totalLoansNow(convertForUserCalculation(player.getCredits()))
                     .win(0L)
                     .build();
+        }
 
         // Получаем состояния системы
         Lotto lotto = lottoRepo.findFirstByOrderByCreatedAtDesc();
@@ -129,6 +131,7 @@ public class Bet {
         return WonOrNotWon.builder()
                 .totalLoansNow(convertForUserCalculation(player.getCredits()))
                 .win(convertForUserCalculation(boobyPrize))
+                .totalLottoNow(lottoCredits)
                 .replyToBet(Prize.LOTTO)
                 .build();
     }
@@ -160,16 +163,17 @@ public class Bet {
                 .totalLoansNow(convertForUserCalculation(player.getCredits()))
                 .win(convertForUserCalculation(allLotto))
                 .replyToBet(Prize.SUPER_LOTTO)
+                .totalLottoNow(lottoCredits)
                 .build();
     }
 
 
 
-    private WonOrNotWon takeIntoAccountTheBias(Player player, long playerCredits, int bet,
+    private WonOrNotWon takeIntoAccountTheBias(Player player, long playerCredits, Long bet,
                                                RedBlack redBlackBet, long arsenalCredit, long lottoCredits,
                                                Condition condition, int bias) {
 
-        int resultCredits = bet * Constants.FOR_USER_CALCULATIONS;
+        Long resultCredits = bet * Constants.FOR_USER_CALCULATIONS;
 
         player.setCredits(playerCredits - resultCredits);
 
@@ -193,6 +197,7 @@ public class Bet {
         playerRepo.save(player);
 
         return WonOrNotWon.builder()
+                .totalLottoNow(lottoCredits)
                 .replyToBet(Prize.ZERO)
                 .win(0L)
                 .build();
@@ -200,7 +205,7 @@ public class Bet {
 
 
 
-    private WonOrNotWon wonOrNotWon(Player player, long playerCredits, int bet, RedBlack redBlackBet,
+    private WonOrNotWon wonOrNotWon(Player player, long playerCredits, Long bet, RedBlack redBlackBet,
                                     byte generatedLotto, long arsenalCredits, long lottoCredits, Condition condition) {
 
         // если лото позволяет дробление
@@ -213,7 +218,7 @@ public class Bet {
 
         Enums redBlackConvert = Converter.convert(generatedLotto);
 
-        int resultCredits = bet * Constants.FOR_USER_CALCULATIONS;
+        Long resultCredits = bet * Constants.FOR_USER_CALCULATIONS;
 
         // если игрок выиграл
         if (redBlackConvert.equals(redBlackBet)) {
@@ -227,6 +232,7 @@ public class Bet {
             playerRepo.save(player);
 
             return WonOrNotWon.builder()
+                    .totalLottoNow(lottoCredits)
                     .replyToBet(Prize.WIN)
                     .win(bet)
                     .build();
@@ -241,6 +247,7 @@ public class Bet {
 
         return WonOrNotWon.builder()
                 .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                .totalLottoNow(lottoCredits)
                 .replyToBet(Prize.ZERO)
                 .win(0L)
                 .build();

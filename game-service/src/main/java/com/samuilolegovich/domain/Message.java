@@ -22,6 +22,8 @@ public class Message {
     private long id;
     private String tag;
     private String message;
+    @Column(name = "number_of_likes")
+    private int numberOfLikes;
 
     // много сообщений к одному юзеру
     // и сразу выдергиваем автора к каждому сообщению
@@ -32,9 +34,10 @@ public class Message {
     @ManyToMany
     @JoinTable(
             name = "messages_likes",
-            joinColumns = { @JoinColumn(name = "messages_id") },
+            joinColumns = { @JoinColumn(name = "message_id") },
             inverseJoinColumns = { @JoinColumn(name = "player_id")}
     )
+
     private Set<Player> likes = new HashSet<>();
 
     public String getPlayerNickName() {

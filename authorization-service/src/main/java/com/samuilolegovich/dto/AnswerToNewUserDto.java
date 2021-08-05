@@ -11,8 +11,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewUserDto {
-    private String login;
-    private String email;
-    private String password;
+public class AnswerToNewUserDto {
+    private String errorMessage;
+    private String message;
 }

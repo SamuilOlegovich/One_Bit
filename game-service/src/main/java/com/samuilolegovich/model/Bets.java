@@ -1,6 +1,5 @@
 package com.samuilolegovich.model;
 
-import com.samuilolegovich.domain.Player;
 import com.samuilolegovich.dto.WonOrNotWon;
 import com.samuilolegovich.enums.RedBlack;
 

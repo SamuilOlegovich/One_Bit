@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -21,9 +22,16 @@ public class Donations {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     private long donations;
-    private long totalDonations;
+    private long win;
+    @Column(name = "type_win")
     private Prize typeWin;
-    @Column(updatable = false)
+    @Column(name = "total_donations")
+    private long totalDonations;
+
+    @CreationTimestamp
+    // указываем что поле не обновляемое
+    @Column(name = "created_at", updatable = false)
+    // указываем как у нас будет сохранятся дата при сериализации
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime creationDate;
+    private LocalDateTime createdAt;
 }

@@ -1,5 +1,6 @@
 package com.samuilolegovich.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class Player {
     @Id // @ID - Важно чтобы была из библиотеке -> javax.persistence.Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+    @Column(name = "user_name")
     @NotBlank(message = "Nickname name cannot be empty")
     private String userName;
     @Email(message = "Email is not correct")
@@ -62,10 +64,25 @@ public class Player {
     private Set<Message> messages;
 
     @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    // указываем как у нас будет сохранятся дата при сериализации
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
+
+    @Column(name = "last_login_timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastLoginTimestamp;
+
+    @Column(name = "account_block_timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime accountBlockTimestamp;
+
+    @Column(name = "reset_token_Timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime resetTokenTimestamp;
+
+    @Column(name = "last_request_timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastRequestTimestamp;
 
     public boolean isAdmin() {

@@ -18,8 +18,8 @@ public class BetConfig {
 
 
     @Bean
-    public Bet getBet() {
-        return Bet.getInstance(conditionRepo, donationsRepo,
+    public BetLogic getBet() {
+        return BetLogic.getInstance(conditionRepo, donationsRepo,
                 arsenalRepo, playerRepo, lottoRepo);
     }
     */
