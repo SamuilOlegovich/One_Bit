@@ -5,10 +5,12 @@ CREATE TABLE IF NOT EXISTS players (
     password                VARCHAR(255)    NOT NULL,
     activation_code         VARCHAR(255),
     active                  BOOLEAN         DEFAULT false,
+    locked                  BOOLEAN         DEFAULT false,
     wallet                  VARCHAR(255),
     tag_wallet              VARCHAR(100),
     credits                 BIGINT,
     account_status_code     VARCHAR(10)     DEFAULT '000',
+    resetPasswordToken      VARCHAR(255),
     activation_account_code VARCHAR(255),
     restart_password_code   VARCHAR(255),
     pay_code                VARCHAR(255),
@@ -17,6 +19,7 @@ CREATE TABLE IF NOT EXISTS players (
     account_block_timestamp TIMESTAMP,
     reset_token_timestamp   TIMESTAMP,
     last_request_timestamp  TIMESTAMP,
+    password_timestamp      TIMESTAMP,
 
     PRIMARY KEY (id)
 );

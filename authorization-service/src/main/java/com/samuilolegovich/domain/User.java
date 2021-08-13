@@ -11,16 +11,24 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
+import static java.time.LocalDateTime.now;
+import static java.util.Objects.nonNull;
+import static javax.persistence.CascadeType.*;
+import static javax.persistence.FetchType.LAZY;
+
 @Data
-@Table(name = "players")
+@Table(name = "userss")
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 // Данные о игроке
-public class Player {
+public class User {
     @Id // @ID - Важно чтобы была из библиотеке -> javax.persistence.Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -33,14 +41,18 @@ public class Player {
     @NotBlank(message = "Password cannot be empty")
     private String password;
 
+    private boolean active;
+    private boolean locked;
+
     private String wallet;
     private String tagWallet;
     private long credits;
 
     @Enumerated(EnumType.STRING)
     private AccountStatusCode accountStatusCode;
-    // можно использовать для верификации емейла, для подтверждения вывода средств, для смены ароля
+    // можно использовать для верификации емейла, для подтверждения вывода средств
     private String activationAccountCode;
+    private String resetPasswordToken;
     private String payCode;
     private String restartPasswordCode;
     private int incorrectLoginCounter;
@@ -60,7 +72,7 @@ public class Player {
 
     // это у нас обратная связ по сообщением связана с автором
     // (будем получать все сррбщения которые были созданы пользователем)
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = LAZY)
     private Set<Message> messages;
 
     @CreationTimestamp
@@ -85,7 +97,38 @@ public class Player {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastRequestTimestamp;
 
+    @Column(name = "password_timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime passwordTimestamp;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", fetch = LAZY, cascade = {PERSIST, REFRESH, MERGE, REMOVE}, orphanRemoval = true)
+    private List<PasswordHistory> passwordHistories = new LinkedList<>();
+
+
+
     public boolean isAdmin() {
         return roles.contains(Role.ROLE_ADMIN);
     }
+
+
+
+    public User setPassword(String encryptPassword) {
+        LocalDateTime timestamp = now();
+        PasswordHistory history = PasswordHistory.builder().password(password).createdAt(timestamp).user(this).build();
+        if (passwordHistories.size() >= 24) {
+            passwordHistories.remove(0);
+        }
+        passwordHistories.add(history);
+        this.password = encryptPassword;
+        passwordTimestamp = timestamp;
+        return this;
+    }
+
+
+
+    public boolean isOnline() {
+        return (nonNull(lastRequestTimestamp)) && ChronoUnit.MINUTES.between(lastRequestTimestamp, now()) < 15;
+    }
+
 }

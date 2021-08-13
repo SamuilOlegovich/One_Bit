@@ -13,6 +13,7 @@
         <module name="gateway-service" />
         <module name="simple-game-service" />
         <module name="authorization-service" />
+        <module name="gateway" />
         <module name="eureca-service" />
       </profile>
     </annotationProcessing>
