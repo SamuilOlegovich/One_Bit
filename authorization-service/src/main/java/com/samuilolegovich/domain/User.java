@@ -1,10 +1,8 @@
 package com.samuilolegovich.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.samuilolegovich.enums.AccountStatusCode;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -12,6 +10,7 @@ import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +21,7 @@ import static javax.persistence.CascadeType.*;
 import static javax.persistence.FetchType.LAZY;
 
 @Data
-@Table(name = "userss")
+@Table(name = "users")
 @Entity
 @Builder
 @NoArgsConstructor
@@ -45,16 +44,23 @@ public class User {
     private boolean locked;
 
     private String wallet;
+    @Column(name = "user_name")
     private String tagWallet;
     private long credits;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "account_status_code")
     private AccountStatusCode accountStatusCode;
     // можно использовать для верификации емейла, для подтверждения вывода средств
+    @Column(name = "activation_account_code")
     private String activationAccountCode;
+    @Column(name = "reset_password_token")
     private String resetPasswordToken;
+    @Column(name = "pay_code")
     private String payCode;
+    @Column(name = "restart_password_code")
     private String restartPasswordCode;
+    @Column(name = "incorrect_login_counter")
     private int incorrectLoginCounter;
     /*
         @ElementCollection - позволяет сформировать таблицу для enam
@@ -104,6 +110,12 @@ public class User {
     @Builder.Default
     @OneToMany(mappedBy = "user", fetch = LAZY, cascade = {PERSIST, REFRESH, MERGE, REMOVE}, orphanRemoval = true)
     private List<PasswordHistory> passwordHistories = new LinkedList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<ChallengeQuestion> challengeQuestions = new ArrayList<>();
 
 
 

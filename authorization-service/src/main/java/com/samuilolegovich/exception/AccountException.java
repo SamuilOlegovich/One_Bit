@@ -1,6 +1,6 @@
 package com.samuilolegovich.exception;
 
-import com.samuilolegovich.domain.AccountStatusCode;
+import com.samuilolegovich.enums.AccountStatusCode;
 import com.samuilolegovich.domain.User;
 import lombok.Getter;
 import org.springframework.web.bind.annotation.ResponseStatus;

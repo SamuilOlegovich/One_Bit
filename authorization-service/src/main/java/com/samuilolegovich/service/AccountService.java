@@ -4,7 +4,7 @@ import com.samuilolegovich.dto.*;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 public interface AccountService {
-    AnswerEmailConfirmationDto confirmEmail(String emailToken);
+    AnswerEmailConfirmationDto confirmEmail(Long userId, String emailToken);
 
     AnswerToNewUserDto registerNewPlayer(NewUserDto newUserDto);
 
@@ -13,6 +13,8 @@ public interface AccountService {
     void logout(OAuth2Authentication auth);
 
     void blockAccount(Long userId);
+
+    void blockAccount(Long userId, Long daysToBlock);
 
     void unblockAccount(Long userId);
 

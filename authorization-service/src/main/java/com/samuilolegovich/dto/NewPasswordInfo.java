@@ -5,9 +5,10 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
-@ApiModel(description = "Data model with with new password and challenge questions.")
+@ApiModel(description = "Модель данных с новым паролем и контрольными вопросами.")
 public class NewPasswordInfo {
     @NotNull
     private String passwordToken;

@@ -28,7 +28,6 @@ public class AuthorizationController {
     @ApiOperation(value = "Получить принципала пользователя. Создать модель PlayerDto из модели данных аутентификации.")
     public Object principal(@AuthenticationPrincipal Authentication authentication) {
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-
         return UserDto.builder()
                 .playerId(principal.getUserId())
                 .userName(principal.getUsername())
@@ -46,10 +45,11 @@ public class AuthorizationController {
 
 
 
-    @PostMapping("/email/{emailToken}")
+    @PostMapping("/confirm-email/{userId}/{emailToken}")
     @ApiOperation(value = "Подтверждаем емейл по токену")
-    private AnswerEmailConfirmationDto confirmEmail(@PathVariable String emailToken) {
-        return accountService.confirmEmail(emailToken);
+    private AnswerEmailConfirmationDto confirmEmail(@PathVariable Long userId,
+                                                    @PathVariable String emailToken) {
+        return accountService.confirmEmail(userId, emailToken);
     }
 
 
@@ -93,7 +93,6 @@ public class AuthorizationController {
     @ApiOperation(value = "Блокировать учетную запись пользователя по желанию пользователя.")
     public void blockMyAccount(@ApiIgnore @AuthenticationPrincipal(expression = "userId") Long userId,
                                @RequestBody @Valid MyAccountBlockDto myAccountBlockDto) {
-
         accountService.blockAccount(userId, myAccountBlockDto.getDaysToBlock());
     }
 

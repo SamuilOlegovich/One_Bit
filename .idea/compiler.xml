@@ -13,7 +13,7 @@
         <module name="gateway-service" />
         <module name="simple-game-service" />
         <module name="authorization-service" />
-        <module name="gateway" />
+        <module name="notification-service" />
         <module name="eureca-service" />
       </profile>
     </annotationProcessing>
@@ -29,6 +29,7 @@
       <module name="eureca-service" options="-parameters" />
       <module name="game-service" options="-parameters" />
       <module name="gateway-service" options="-parameters" />
+      <module name="notification-service" options="-parameters" />
       <module name="pay-service" options="-parameters" />
       <module name="simple-game-service" options="-parameters" />
     </option>
