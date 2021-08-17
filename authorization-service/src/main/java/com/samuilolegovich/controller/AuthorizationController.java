@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -21,6 +22,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class AuthorizationController {
     private final AccountService accountService;
+
 
 
 
@@ -39,24 +41,24 @@ public class AuthorizationController {
 
     @PostMapping("/new-user")
     @ApiOperation(value = "Регистрируем пользователя.")
-    public AnswerToNewUserDto newUserRegistration(@RequestBody NewUserDto newUserDto) {
-        return accountService.registerNewPlayer(newUserDto);
+    public void newUserRegistration(@RequestBody NewUserDto newUserDto) {
+        accountService.registerNewPlayer(newUserDto);
     }
 
 
 
     @PostMapping("/confirm-email/{userId}/{emailToken}")
     @ApiOperation(value = "Подтверждаем емейл по токену")
-    private AnswerEmailConfirmationDto confirmEmail(@PathVariable Long userId,
-                                                    @PathVariable String emailToken) {
-        return accountService.confirmEmail(userId, emailToken);
+    private void confirmEmail(@PathVariable String userEmail,
+                              @PathVariable String emailToken) {
+        accountService.confirmEmail(userEmail, emailToken);
     }
 
 
 
     @PostMapping("/log-in")
     @ApiOperation(value = "Вход")
-    private AnswerSignInDto signIn(@RequestBody SignInDto signInDto) {
+    private OAuth2AccessToken signIn(@RequestBody SignInDto signInDto) {
         return accountService.signIn(signInDto);
     }
 
@@ -73,18 +75,10 @@ public class AuthorizationController {
     // разобраться как оно работает и допилить
     @PostMapping("/account/{userId}/block")
     @ApiOperation(value = "Заблокировать учетную запись пользователя.")
-    public void blockUserAccount(@ApiParam(value = "Хранит значение идентификатора пользователя.", required = true)
-                                     @PathVariable Long userId) {
+    public void blockUserAccount(
+            @ApiParam(value = "Хранит значение идентификатора пользователя.", required = true)
+            @PathVariable Long userId) {
         accountService.blockAccount(userId);
-    }
-
-
-
-    @PostMapping("/account/{userId}/unblock")
-    @ApiOperation(value = "Разблокировать учетную запись пользователя.")
-    public void unblockAccount(@ApiParam(value = "Хранит значение идентификатора пользователя.", required = true)
-                                   @PathVariable Long userId) {
-        accountService.unblockAccount(userId);
     }
 
 
@@ -94,6 +88,16 @@ public class AuthorizationController {
     public void blockMyAccount(@ApiIgnore @AuthenticationPrincipal(expression = "userId") Long userId,
                                @RequestBody @Valid MyAccountBlockDto myAccountBlockDto) {
         accountService.blockAccount(userId, myAccountBlockDto.getDaysToBlock());
+    }
+
+
+
+    @PostMapping("/account/{userId}/unblock")
+    @ApiOperation(value = "Разблокировать учетную запись пользователя.")
+    public void unblockAccount(
+            @ApiParam(value = "Хранит значение идентификатора пользователя.", required = true)
+            @PathVariable Long userId) {
+        accountService.unblockAccount(userId);
     }
 
 
@@ -112,6 +116,7 @@ public class AuthorizationController {
     public void resetPassword(@Valid @RequestBody NewPasswordInfo newPasswordInfo) {
         accountService.resetPassword(newPasswordInfo);
     }
+
 
 
     @PostMapping("/password/change-by-token")

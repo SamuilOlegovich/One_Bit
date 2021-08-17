@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.samuilolegovich.enums.AccountStatusCode.ACTIVE_ACCOUNT;
 import static java.time.LocalDateTime.now;
 import static java.util.Objects.nonNull;
 import static javax.persistence.CascadeType.*;
@@ -42,6 +43,8 @@ public class User {
 
     private boolean active;
     private boolean locked;
+    @Column(name = "days_to_block")
+    private Long daysToBlock;
 
     private String wallet;
     @Column(name = "user_name")
@@ -135,6 +138,14 @@ public class User {
         this.password = encryptPassword;
         passwordTimestamp = timestamp;
         return this;
+    }
+
+
+
+    public void unblockUserAccountHelper() {
+        accountStatusCode = ACTIVE_ACCOUNT;
+        accountBlockTimestamp = null;
+        daysToBlock = null;
     }
 
 

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS players (
     reset_token_timestamp   TIMESTAMP,
     last_request_timestamp  TIMESTAMP,
     password_timestamp      TIMESTAMP,
+    days_to_block           BIGINT,
 
     PRIMARY KEY (id)
 );
