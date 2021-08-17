@@ -154,4 +154,9 @@ public class User {
         return (nonNull(lastRequestTimestamp)) && ChronoUnit.MINUTES.between(lastRequestTimestamp, now()) < 15;
     }
 
+    public void addChallengeQuestion(ChallengeQuestion challengeQuestion) {
+        challengeQuestion.setUser(this);
+        this.challengeQuestions.add(challengeQuestion);
+    }
+
 }

@@ -1,8 +1,9 @@
 package com.samuilolegovich.model;
 
+import com.samuilolegovich.domain.User;
 import com.samuilolegovich.dto.WonOrNotWon;
 import com.samuilolegovich.enums.RedBlack;
 
 public interface Bets {
-    public WonOrNotWon calculateTheWin(Player player, int bet, RedBlack redBlack);
+    WonOrNotWon calculateTheWin(User user, int bet, RedBlack redBlack);
 }

@@ -22,5 +22,5 @@ public class Constants {
 
     public static final byte BIAS = 2;
 
-    public static final int MINIMUM_LOTO_FOR_DRAWING_POSSIBILITIES = 1000;
+    public static final int MINIMUM_LOTTO_FOR_DRAWING_POSSIBILITIES = 1000;
 }

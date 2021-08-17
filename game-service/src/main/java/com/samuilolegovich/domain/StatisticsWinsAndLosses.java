@@ -24,7 +24,7 @@ public class StatisticsWinsAndLosses {
     @Id // @ID - Важно чтобы была из библиотеке -> javax.persistence.Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    @Column(name = "player_id")
+    @Column(name = "user_id")
     private long playerId;
     private long bet;
     private long win;

@@ -28,17 +28,17 @@ public class Message {
     // много сообщений к одному юзеру
     // и сразу выдергиваем автора к каждому сообщению
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "player_id")
-    private Player author;
+    @JoinColumn(name = "user_id")
+    private User author;
 
     @ManyToMany
     @JoinTable(
             name = "messages_likes",
             joinColumns = { @JoinColumn(name = "message_id") },
-            inverseJoinColumns = { @JoinColumn(name = "player_id")}
+            inverseJoinColumns = { @JoinColumn(name = "user_id")}
     )
 
-    private Set<Player> likes = new HashSet<>();
+    private Set<User> likes = new HashSet<>();
 
     public String getPlayerNickName() {
         return MessageHelper.getPlayerUserName(author);

@@ -11,8 +11,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BetDto {
-    private Long playerId;
-    private String playerName;
+    private Long userId;
+    private String userName;
     private Long bet;
     private Enums colorBet;
 }
