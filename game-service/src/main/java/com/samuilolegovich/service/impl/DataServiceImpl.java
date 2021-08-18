@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class DataServiceImpl implements DataService {
-    private LottoRepo lottoRepo;
+    private final LottoRepo lottoRepo;
 
     public AnswerToBetDto getDataFoThisPage() {
         Long lottoNow = lottoRepo.findFirstByOrderByCreatedAtDesc().getTotalLottoCredits();

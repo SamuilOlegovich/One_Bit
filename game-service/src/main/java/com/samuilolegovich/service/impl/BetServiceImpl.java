@@ -59,8 +59,7 @@ public class BetServiceImpl implements BetService {
                         .informationForBet(InformationAboutRates.SOMETHING_WENT_WRONG)
                         .claimedCombination(betDto.getColorBet())
                         .win(0L)
-                        .build()
-                );
+                        .build());
 
     }
 

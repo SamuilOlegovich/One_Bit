@@ -66,7 +66,7 @@ public class AccountServiceImpl implements AccountService {
 
     private static final String CLIENT_ID = "com-samuil-olegovich";
 
-    @Value("${auth.path-to-email-confirmation-controller}")
+    @Value("${auth.path-to-email-confirmation-controller}")     //  .../authorization/confirm-email
     private final String pathToEmailConfirmationController;
     @Value(("${auth.account-block-minutes}"))
     private final int accountBlockMinutes;
