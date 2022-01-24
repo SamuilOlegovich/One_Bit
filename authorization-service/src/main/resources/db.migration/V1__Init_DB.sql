@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS players (
     account_block_timestamp TIMESTAMP,
     reset_token_timestamp   TIMESTAMP,
     last_request_timestamp  TIMESTAMP,
+    password_timestamp      TIMESTAMP,
 
     PRIMARY KEY (id)
 );

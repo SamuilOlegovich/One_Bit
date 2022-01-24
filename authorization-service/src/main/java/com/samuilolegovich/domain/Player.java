@@ -11,7 +11,16 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
+
+import static java.time.LocalDateTime.now;
+import static java.util.Objects.nonNull;
+import static javax.persistence.CascadeType.*;
+import static javax.persistence.CascadeType.REMOVE;
+import static javax.persistence.FetchType.LAZY;
 
 @Data
 @Table(name = "players")
@@ -85,7 +94,37 @@ public class Player {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastRequestTimestamp;
 
+    @Column(name = "password_timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime passwordTimestamp;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", fetch = LAZY, cascade = {PERSIST, REFRESH, MERGE, REMOVE}, orphanRemoval = true)
+    private List<PasswordHistory> passwordHistories = new LinkedList<>();
+
+
+
     public boolean isAdmin() {
         return roles.contains(Role.ROLE_ADMIN);
+    }
+
+
+
+    public Player setPassword(String encryptPassword) {
+        LocalDateTime timestamp = now();
+        PasswordHistory history = PasswordHistory.builder().password(password).createdAt(timestamp).user(this).build();
+        if (passwordHistories.size() >= 24) {
+            passwordHistories.remove(0);
+        }
+        passwordHistories.add(history);
+        this.password = encryptPassword;
+        passwordTimestamp = timestamp;
+        return this;
+    }
+
+
+
+    public boolean isOnline() {
+        return (nonNull(lastRequestTimestamp)) && ChronoUnit.MINUTES.between(lastRequestTimestamp, now()) < 15;
     }
 }

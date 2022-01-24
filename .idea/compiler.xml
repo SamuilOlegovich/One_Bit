@@ -2,32 +2,37 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
-      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="config-service" />
         <module name="pay-service" />
+        <module name="config-service" />
         <module name="game-service" />
-        <module name="gateway-service" />
         <module name="simple-game-service" />
         <module name="authorization-service" />
+        <module name="gateway" />
         <module name="eureca-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="configg" target="11" />
+      <module name="authorization-service" target="11" />
+      <module name="config-service" target="11" />
+      <module name="eureca-service" target="11" />
+      <module name="game-service" target="11" />
+      <module name="gateway" target="11" />
+      <module name="OneBitCasino" target="11" />
+      <module name="pay-service" target="11" />
+      <module name="simple-game-service" target="11" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="authorization-service" options="-parameters" />
       <module name="config-service" options="-parameters" />
-      <module name="configg" options="-parameters" />
       <module name="eureca-service" options="-parameters" />
       <module name="game-service" options="-parameters" />
-      <module name="gateway-service" options="-parameters" />
+      <module name="gateway" options="-parameters" />
       <module name="pay-service" options="-parameters" />
       <module name="simple-game-service" options="-parameters" />
     </option>

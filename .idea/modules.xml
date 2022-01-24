@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/OneBitCasino.iml" filepath="$PROJECT_DIR$/OneBitCasino.iml" />
+      <module fileurl="file://$PROJECT_DIR$/authorization-service/authorization-service.iml" filepath="$PROJECT_DIR$/authorization-service/authorization-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/config-service/config-service.iml" filepath="$PROJECT_DIR$/config-service/config-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/eureca-service/eureca-service.iml" filepath="$PROJECT_DIR$/eureca-service/eureca-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/game-service/game-service.iml" filepath="$PROJECT_DIR$/game-service/game-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gateway-service/gateway.iml" filepath="$PROJECT_DIR$/gateway-service/gateway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pay-service/pay-service.iml" filepath="$PROJECT_DIR$/pay-service/pay-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-game-service/simple-game-service.iml" filepath="$PROJECT_DIR$/simple-game-service/simple-game-service.iml" />
+    </modules>
+  </component>
+</project>
