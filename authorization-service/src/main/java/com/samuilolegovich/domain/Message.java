@@ -29,7 +29,7 @@ public class Message {
     // и сразу выдергиваем автора к каждому сообщению
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "player_id")
-    private Player author;
+    private User author;
 
     @ManyToMany
     @JoinTable(
@@ -38,7 +38,7 @@ public class Message {
             inverseJoinColumns = { @JoinColumn(name = "player_id")}
     )
 
-    private Set<Player> likes = new HashSet<>();
+    private Set<User> likes = new HashSet<>();
 
     public String getPlayerNickName() {
         return MessageHelper.getPlayerUserName(author);

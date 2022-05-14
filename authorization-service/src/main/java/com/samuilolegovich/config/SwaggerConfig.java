@@ -15,6 +15,7 @@ import static springfox.documentation.spi.DocumentationType.SWAGGER_2;
 @EnableSwagger2
 @Import(BeanValidatorPluginsConfiguration.class)
 public class SwaggerConfig {
+
     @Bean
     public Docket api() {
         return new Docket(SWAGGER_2)

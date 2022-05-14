@@ -44,6 +44,7 @@
         <module>game-service</module>
         <module>pay-service</module>
         <module>simple-game-service</module>
+        <module>notification-service</module>
     </modules>
 
 

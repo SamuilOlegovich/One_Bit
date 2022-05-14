@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 public class WonOrNotWon {
     private Enums declaredRate;
     private Enums replyToBet;
-    private long playerCredits;
+    private long userCredits;
     private long bet;
     private long win;
     private long totalLoansNow;

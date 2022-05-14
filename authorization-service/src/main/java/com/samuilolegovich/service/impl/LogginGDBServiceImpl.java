@@ -25,6 +25,7 @@ public class LogginGDBServiceImpl implements LogginGDBService {
     private static final String LOCALHOST_IPV4 = "127.0.0.1";
 
 
+
     private static HttpServletRequest getCurrentHttpRequest() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
@@ -34,6 +35,7 @@ public class LogginGDBServiceImpl implements LogginGDBService {
 
         return null;
     }
+
 
 
     @Override
@@ -50,6 +52,25 @@ public class LogginGDBServiceImpl implements LogginGDBService {
                 break;
         }
     }
+
+
+
+    @Override
+    public void logDbMessageWithCustomUsername(String message, String operationType, String authUser, Level level) {
+        switch (level) {
+            default:
+            case INFO:
+                authDBLogger.info(FIVE_PARAMS_PATTER, message, authUser,
+                        getClientIp(), operationType, LocalDateTime.now());
+                break;
+            case WARN:
+                authDBLogger.warn(FIVE_PARAMS_PATTER, message, authUser,
+                        getClientIp(), operationType, LocalDateTime.now());
+                break;
+        }
+    }
+
+
 
     private String getClientIp() {
         HttpServletRequest request = getCurrentHttpRequest();
@@ -71,9 +92,7 @@ public class LogginGDBServiceImpl implements LogginGDBService {
                     ipAddress = getIpFromInetAddress();
                 }
             }
-        } else {
-            ipAddress = getIpFromInetAddress();
-        }
+        } else { ipAddress = getIpFromInetAddress(); }
 
         if (!StringUtils.isEmpty(ipAddress)
                 && ipAddress.length() > 15
@@ -84,13 +103,13 @@ public class LogginGDBServiceImpl implements LogginGDBService {
         return ipAddress;
     }
 
+
+
     private String getIpFromInetAddress() {
         try {
             InetAddress inetAddress = InetAddress.getLocalHost();
             return inetAddress.getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        } catch (UnknownHostException e) { e.printStackTrace(); }
         return "";
     }
 }

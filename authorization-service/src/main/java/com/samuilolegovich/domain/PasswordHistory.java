@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-
 import java.time.LocalDateTime;
 
 import static javax.persistence.FetchType.LAZY;
@@ -25,7 +24,7 @@ public class PasswordHistory {
     private String password;
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "player_id")
-    private Player player;
+    private User user;
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

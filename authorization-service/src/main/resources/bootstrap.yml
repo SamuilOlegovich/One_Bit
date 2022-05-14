@@ -1,3 +1,29 @@
+server:
+  port: 8000
+  tomcat:
+    uri-encoding: UTF-8
+  error:
+    include-message: always
+    include-stacktrace: never
+    include-exception: true
+
+logging.level.com.zaxxer.hikari.HikariConfig: ${LOG_LEVEL:DEBUG}
+logging.level.com.zaxxer.hikari: ${LOG_LEVEL:DEBUG}
+
+
+auth:
+  path-to-email-confirmation-controller: ${path-to-email-confirmation-controller}  //   .../authorization/confirm-email
+  temp-password-days-to-live: 1
+  passwords-history-per-user: 24
+  reset-token-hour-to-live: 24
+  access-token-ttl-seconds: 36000
+  min-challenge-question: 5
+  account-block-minutes: 30
+  password-days-to-live: 60
+  max-login-attempts: 15
+
+
+
 spring:
   application:
     name: authorization-service
@@ -7,3 +33,98 @@ spring:
       fail-fast: true
       password: password
       username: user
+  http:
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
+
+
+  rabbitmq:
+    port: ${RABBITMQ_PORT:1883}
+    host: ${RABBITMQ_HOST:roedeer.rmq.cloudamqp.com}
+    username: ${RABBITMQ_USERNAME:qrloqyoo:qrloqyoo}
+    password: ${RABBITMQ_PASSWORD:HF6Q82JDrBnKcRqah75lgn36cJcVNmmx}
+    connection-timeout: ${RABBITMQ_CONNECTION_TIMEOUT:10000}
+    addresses: ${rabbitmq-addresses}
+
+  flyway:
+    url: ${mysql-url}
+    user: ${mysql-user}
+    password: ${mysql-password}
+
+  datasource:
+    url: ${mysql-url}
+    username: ${mysql-user}
+    password: ${mysql-password}
+    initialization-mode: always
+    hikari:
+      max-lifetime: 28790000
+      leak-detection-threshold: 30000
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheDefaultTimezone: false
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+        format_sql: true
+    redis:
+      url: ${redis-host}
+      port: ${REDIS_PORT:6379}
+      password: ${redis-password}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+
+oauth:
+  client:
+    secret: ${client-secret}
+
+
+security:
+  oauth2:
+    resource:
+      user-info-uri: ${AUTH_USER_URL:http://localhost:8000/auth/user}
+      prefer-token-info: false
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 60000
+        readTimeout: 60000
+
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE
+
+logging:
+  config: classpath:logback-spring.xml

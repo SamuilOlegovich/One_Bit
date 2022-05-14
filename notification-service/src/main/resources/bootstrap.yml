@@ -1,0 +1,68 @@
+#spring:
+#  application:
+#    name: eureca
+#  cloud:
+#    config:
+#      uri: http://config:8888
+#      fail-fast: true
+#      password: ${CONFIG_SERVICE_PASSWORD}
+#      username: user
+
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#  client:
+#    registerWithEureka: false
+#    fetchRegistry: false
+
+
+
+server:
+  port: ${NOTIFICATION_PORT:8005}
+  tomcat:
+    uri-encoding: UTF-8
+
+#azure:
+#  keyvault:
+#    client-id: ${ARM_CLIENT_ID}
+#    client-key: ${ARM_CLIENT_SECRET}
+#    enabled: true
+#    tenant-id: ${ARM_TENANT_ID}
+#    uri: ${ARM_KEYVAULT_URI}
+
+spring:
+  application:
+    name: notification-service
+  http:
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
+  cloud:
+    config:
+      uri: http://config:8888
+      fail-fast: true
+      password: ${CONFIG_SERVICE_PASSWORD}
+      username: user
+  ##Charset of HTTP requests and responses. Added to the "Content-Type" header if not set explicitly.
+  #spring.http.encoding.charset=UTF-8
+  ## Enable http encoding support.
+  #spring.http.encoding.enabled=true
+  ## Force the encoding to the configured charset on HTTP requests and responses.
+  #spring.http.encoding.force=true
+  #server.tomcat.uri-encoding=UTF-8
+
+  rabbitmq:
+    addresses: ${rabbitmq-addresses}
+  sendgrid:
+    api-key: ${sendgrid-api-key}
+
+email:
+  sender: ${EMAIL_FROM:one@bit.io}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

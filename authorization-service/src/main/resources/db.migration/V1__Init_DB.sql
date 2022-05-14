@@ -3,12 +3,13 @@ CREATE TABLE IF NOT EXISTS players (
     user_name               VARCHAR(255)    NOT NULL,
     email                   VARCHAR(255)    NOT NULL,
     password                VARCHAR(255)    NOT NULL,
-    activation_code         VARCHAR(255),
     active                  BOOLEAN         DEFAULT false,
+    locked                  BOOLEAN         DEFAULT false,
     wallet                  VARCHAR(255),
     tag_wallet              VARCHAR(100),
     credits                 BIGINT,
     account_status_code     VARCHAR(10)     DEFAULT '000',
+    reset_password_token    VARCHAR(255),
     activation_account_code VARCHAR(255),
     restart_password_code   VARCHAR(255),
     pay_code                VARCHAR(255),
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS players (
     reset_token_timestamp   TIMESTAMP,
     last_request_timestamp  TIMESTAMP,
     password_timestamp      TIMESTAMP,
+    days_to_block           BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -130,3 +132,17 @@ CREATE TABLE IF NOT EXISTS statistics_wins_and_losses (
 
     PRIMARY KEY (id)
 );
+
+
+
+CREATE TABLE IF NOT EXISTS challenge_question
+(
+    id                      BIGINT          AUTO_INCREMENT,
+    type                    VARCHAR(50),
+    answer                  VARCHAR(255),
+    user_id                 BIGINT          NOT NULL,
+
+    PRIMARY KEY (id),
+    CONSTRAINT uc_question_per_user UNIQUE (user_id, type),
+    CONSTRAINT challenge_question_user_FK FOREIGN KEY (user_id) REFERENCES users (id)
+    );

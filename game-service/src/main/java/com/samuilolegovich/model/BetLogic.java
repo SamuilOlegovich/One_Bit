@@ -21,8 +21,8 @@ public class BetLogic {
     private final ConditionRepo conditionRepo;
     private final DonationsRepo donationsRepo;
     private final ArsenalRepo arsenalRepo;
-    private final PlayerRepo playerRepo;
     private final LottoRepo lottoRepo;
+    private final UserRepo userRepo;
 
 
     /*  Если будут проблеммы с синхронизацией и неадекватным списанием средств
@@ -59,9 +59,9 @@ public class BetLogic {
 
 
 
-    public WonOrNotWon calculateTheWin(Player player, Long bet, RedBlack redBlackBet) {
+    public WonOrNotWon calculateTheWin(User user, Long bet, RedBlack redBlackBet) {
         // получаем игрока и данные о его кредитах
-        long playerCredits = player.getCredits();
+        long playerCredits = user.getCredits();
 
         // берем последнюю запись в арсенале (она максимально актуальна на данный момент)
         Arsenal arsenal = arsenalRepo.findFirstByOrderByCreatedAtDesc();
@@ -70,9 +70,9 @@ public class BetLogic {
         // проверяем достаточно ли кредитов в запасе на ответ ставке
         if (convertForUserCalculation(arsenalCredit) <= bet) {
             return WonOrNotWon.builder()
-                    .totalLottoNow(lottoRepo.findFirstByOrderByCreatedAtDesc().getLottoCredits())
+                    .totalLottoNow(lottoRepo.findFirstByOrderByCreatedAtDesc().getTotalLottoCredits())
                     .replyToBet(InformationAboutRates.NOT_ENOUGH_CREDIT_FOR_ANSWER)
-                    .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                    .totalLoansNow(convertForUserCalculation(user.getCredits()))
                     .win(0L)
                     .build();
         }
@@ -82,7 +82,7 @@ public class BetLogic {
         Condition condition = conditionRepo.findByBet(bet);
 
         // получаем данные по состоянию
-        long lottoCredits = lotto.getLottoCredits();
+        long lottoCredits = lotto.getTotalLottoCredits();
         int bias = condition.getBias();
 
         // генерируем число
@@ -93,15 +93,16 @@ public class BetLogic {
             // если лото позволяет дробление
             if (checkForWinningsLotto(lottoCredits)) {
                 if (generatedLotto == Constants.LOTTO)
-                    return point(player, playerCredits, lottoCredits);
+                    return point(user, playerCredits, lottoCredits);
                 if (generatedLotto == Constants.SUPER_LOTTO)
-                    return superLotto(player, playerCredits, lottoCredits);
+                    return superLotto(user, playerCredits, lottoCredits);
             }
-            return takeIntoAccountTheBias(player, playerCredits, bet, redBlackBet, arsenalCredit,
+
+            return takeIntoAccountTheBias(user, playerCredits, bet, redBlackBet, arsenalCredit,
                     lottoCredits, condition, bias);
         }
 
-        return wonOrNotWon(player, playerCredits, bet, redBlackBet, generatedLotto,
+        return wonOrNotWon(user, playerCredits, bet, redBlackBet, generatedLotto,
                 arsenalCredit, lottoCredits, condition);
     }
 
@@ -109,27 +110,27 @@ public class BetLogic {
 
 
 
-    private WonOrNotWon point(Player player, long playerCredits, long lottoCredits) {
+    private WonOrNotWon point(User user, long playerCredits, long lottoCredits) {
         long onePercent = lottoCredits / 100L;
         long boobyPrize = onePercent * Constants.BOOBY_PRIZE;
         long totalDonation = donationsRepo.findFirstByOrderByCreatedAtDesc().getTotalDonations() + onePercent;
 
-        player.setCredits(playerCredits + boobyPrize);
+        user.setCredits(playerCredits + boobyPrize);
 
         lottoRepo.save(Lotto.builder()
-                .lottoCredits(lottoCredits - (boobyPrize + onePercent))
-                .build()
-        );
+                .totalLottoCredits(lottoCredits - (boobyPrize + onePercent))
+                .build());
+
         donationsRepo.save(Donations.builder()
                 .totalDonations(totalDonation)
                 .donations(onePercent)
                 .typeWin(Prize.LOTTO)
-                .build()
-        );
-        playerRepo.save(player);
+                .build());
+
+        userRepo.save(user);
 
         return WonOrNotWon.builder()
-                .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                .totalLoansNow(convertForUserCalculation(user.getCredits()))
                 .win(convertForUserCalculation(boobyPrize))
                 .totalLottoNow(lottoCredits)
                 .replyToBet(Prize.LOTTO)
@@ -138,29 +139,29 @@ public class BetLogic {
 
 
 
-    private WonOrNotWon superLotto(Player player, long playerCredits, long lottoCredits) {
+    private WonOrNotWon superLotto(User user, long playerCredits, long lottoCredits) {
         // добавить откусывание 10 процентов в фонд
         long onePercent = lottoCredits / 100L;
         long donation = onePercent * Constants.DONATE;
         long allLotto = onePercent * Constants.PRIZE;
         long totalDonations = donationsRepo.findFirstByOrderByCreatedAtDesc().getTotalDonations() + donation;
 
-        player.setCredits(playerCredits + allLotto);
+        user.setCredits(playerCredits + allLotto);
 
         donationsRepo.save(Donations.builder()
                 .totalDonations(totalDonations)
                 .typeWin(Prize.LOTTO)
                 .donations(donation)
-                .build()
-        );
+                .build());
+
         lottoRepo.save(Lotto.builder()
-                .lottoCredits(0L)
-                .build()
-        );
-        playerRepo.save(player);
+                .totalLottoCredits(0L)
+                .build());
+
+        userRepo.save(user);
 
         return WonOrNotWon.builder()
-                .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                .totalLoansNow(convertForUserCalculation(user.getCredits()))
                 .win(convertForUserCalculation(allLotto))
                 .replyToBet(Prize.SUPER_LOTTO)
                 .totalLottoNow(lottoCredits)
@@ -169,32 +170,30 @@ public class BetLogic {
 
 
 
-    private WonOrNotWon takeIntoAccountTheBias(Player player, long playerCredits, Long bet,
+    private WonOrNotWon takeIntoAccountTheBias(User user, long playerCredits, Long bet,
                                                RedBlack redBlackBet, long arsenalCredit, long lottoCredits,
                                                Condition condition, int bias) {
 
         Long resultCredits = bet * Constants.FOR_USER_CALCULATIONS;
 
-        player.setCredits(playerCredits - resultCredits);
+        user.setCredits(playerCredits - resultCredits);
 
         // перенос средств в лото или арсенал
         if (bias == Constants.ONE_BIAS) {
             lottoRepo.save(Lotto.builder()
-                    .lottoCredits(lottoCredits + resultCredits)
-                    .build()
-            );
+                    .totalLottoCredits(lottoCredits + resultCredits)
+                    .build());
         } else {
             arsenalRepo.save(Arsenal.builder()
                     .credits(arsenalCredit + resultCredits)
-                    .build()
-            );
+                    .build());
         }
 
         // уменьшаем смещение
         condition.setBias(bias - 1);
 
         conditionRepo.save(condition);
-        playerRepo.save(player);
+        userRepo.save(user);
 
         return WonOrNotWon.builder()
                 .totalLottoNow(lottoCredits)
@@ -205,15 +204,15 @@ public class BetLogic {
 
 
 
-    private WonOrNotWon wonOrNotWon(Player player, long playerCredits, Long bet, RedBlack redBlackBet,
+    private WonOrNotWon wonOrNotWon(User user, long playerCredits, Long bet, RedBlack redBlackBet,
                                     byte generatedLotto, long arsenalCredits, long lottoCredits, Condition condition) {
 
         // если лото позволяет дробление
         if (checkForWinningsLotto(lottoCredits)) {
             if (generatedLotto == Constants.LOTTO)
-                return point(player, playerCredits, lottoCredits);
+                return point(user, playerCredits, lottoCredits);
             if (generatedLotto == Constants.SUPER_LOTTO)
-                return superLotto(player, playerCredits, lottoCredits);
+                return superLotto(user, playerCredits, lottoCredits);
         }
 
         Enums redBlackConvert = Converter.convert(generatedLotto);
@@ -223,13 +222,14 @@ public class BetLogic {
         // если игрок выиграл
         if (redBlackConvert.equals(redBlackBet)) {
             condition.setBias(Constants.BIAS);
-            player.setCredits(playerCredits + resultCredits);
+            user.setCredits(playerCredits + resultCredits);
+
             arsenalRepo.save(Arsenal.builder()
                     .credits(arsenalCredits - resultCredits)
-                    .build()
-            );
+                    .build());
+
             conditionRepo.save(condition);
-            playerRepo.save(player);
+            userRepo.save(user);
 
             return WonOrNotWon.builder()
                     .totalLottoNow(lottoCredits)
@@ -238,15 +238,16 @@ public class BetLogic {
                     .build();
         }
 
-        player.setCredits(playerCredits - resultCredits);
+        user.setCredits(playerCredits - resultCredits);
+
         lottoRepo.save(Lotto.builder()
-                .lottoCredits(lottoCredits + resultCredits)
-                .build()
-        );
-        playerRepo.save(player);
+                .totalLottoCredits(lottoCredits + resultCredits)
+                .build());
+
+        userRepo.save(user);
 
         return WonOrNotWon.builder()
-                .totalLoansNow(convertForUserCalculation(player.getCredits()))
+                .totalLoansNow(convertForUserCalculation(user.getCredits()))
                 .totalLottoNow(lottoCredits)
                 .replyToBet(Prize.ZERO)
                 .win(0L)
@@ -256,6 +257,6 @@ public class BetLogic {
 
 
     private boolean checkForWinningsLotto(long lottoCredits) {
-        return lottoCredits >= Constants.MINIMUM_LOTO_FOR_DRAWING_POSSIBILITIES;
+        return lottoCredits >= Constants.MINIMUM_LOTTO_FOR_DRAWING_POSSIBILITIES;
     }
 }

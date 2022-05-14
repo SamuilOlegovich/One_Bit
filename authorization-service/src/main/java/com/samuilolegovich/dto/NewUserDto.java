@@ -4,15 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+
+import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewUserDto {
-    private String login;
-    private String email;
+    @NotNull
+    private String userName;
+    @NotNull
     private String password;
+    @NotNull
+    private String email;
 }

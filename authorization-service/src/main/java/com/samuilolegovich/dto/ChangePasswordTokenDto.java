@@ -5,8 +5,8 @@ import lombok.Value;
 
 import javax.validation.constraints.NotNull;
 
-@ApiModel(description = "Изменить старый пароль на новы.")
 @Value
+@ApiModel(description = "Изменить старый пароль на новы.")
 public class ChangePasswordTokenDto {
     @NotNull
     String token;

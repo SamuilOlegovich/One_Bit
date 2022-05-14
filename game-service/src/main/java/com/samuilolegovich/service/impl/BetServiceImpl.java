@@ -1,6 +1,6 @@
 package com.samuilolegovich.service.impl;
 
-import com.samuilolegovich.domain.Player;
+import com.samuilolegovich.domain.User;
 import com.samuilolegovich.dto.AnswerToBetDto;
 import com.samuilolegovich.dto.BetDto;
 import com.samuilolegovich.dto.WonOrNotWon;
@@ -31,9 +31,9 @@ public class BetServiceImpl implements BetService {
     private ConditionRepo conditionRepo;
     private DonationsRepo donationsRepo;
     private ArsenalRepo arsenalRepo;
-    private PlayerRepo playerRepo;
     private LottoRepo lottoRepo;
     private BetLogic betLogic;
+    private UserRepo userRepo;
 
     private final String YOUR_ACCOUNT_IS_NOT_ENOUGH_CREDITS_TO_BET = "there_are_not_enough_credits_in_the_account_for_a_bet";
     private final String INVALID_BET_VALUE_MAXIMUM_RATE = "invalid_bet_value_maximum_rate";
@@ -50,24 +50,23 @@ public class BetServiceImpl implements BetService {
 
 
     public AnswerToBetDto placeBet(BetDto betDto) {
-        Optional<Player> optionalPlayer = playerRepo.findById(betDto.getPlayerId());
+        Optional<User> optionalPlayer = userRepo.findById(betDto.getUserId());
 
-        return optionalPlayer.map(player ->
-                placeBet(player, (RedBlack) betDto.getColorBet(), betDto.getBet()))
+        return optionalPlayer.map(user ->
+                placeBet(user, (RedBlack) betDto.getColorBet(), betDto.getBet()))
                 .orElse(AnswerToBetDto.builder()
                         .comment(getMessageForPlayer(PLAYER_NOT_FOUND, getLocale(EN)))
                         .informationForBet(InformationAboutRates.SOMETHING_WENT_WRONG)
                         .claimedCombination(betDto.getColorBet())
                         .win(0L)
-                        .build()
-                );
+                        .build());
 
     }
 
 
-    private AnswerToBetDto placeBet(Player player, RedBlack redBlackBet, Long bet) {
+    private AnswerToBetDto placeBet(User user, RedBlack redBlackBet, Long bet) {
         Long lottoNow = lottoRepo.findFirstByOrderByCreatedAtDesc().getTotalLottoCredits();
-        Long playerCredits = player.getCredits();
+        Long playerCredits = user.getCredits();
 
         // недопустимая ставка == 0
         if (bet == 0) {
@@ -118,7 +117,7 @@ public class BetServiceImpl implements BetService {
         }
 
         // если все хорошо делаем ставку
-        WonOrNotWon wonOrNotWon = betLogic.calculateTheWin(player, bet, redBlackBet);
+        WonOrNotWon wonOrNotWon = betLogic.calculateTheWin(user, bet, redBlackBet);
         Enums enums = wonOrNotWon.getReplyToBet();
 
         // обрабатываем ответы по ставке
